@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:forui/forui.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:dash/models/chart_data_set.dart';
@@ -31,6 +32,12 @@ class _ChartCardState extends State<ChartCard> {
   ChartDataSet get _currentDataSet {
     final periodKey = widget.timePeriods[_selectedIndex];
     return widget.datasets[periodKey] ?? widget.datasets.values.first;
+  }
+
+  // Compute a safe label step so we render ~8 labels max to avoid overlap
+  int _labelStep() {
+    final count = _currentDataSet.primaryData.length;
+    return math.max(1, (count / 8).ceil());
   }
 
   double _getMaxValue() {
@@ -359,16 +366,16 @@ class _ChartCardState extends State<ChartCard> {
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 30,
-                        interval: (_currentDataSet.primaryData.length / 10)
-                            .ceilToDouble(),
+                        reservedSize: 28,
+                        interval: _labelStep().toDouble(),
                         getTitlesWidget: (value, meta) {
                           final index = value.toInt();
                           final currentData = _currentDataSet;
                           final dataLength = currentData.primaryData.length;
+                          final step = _labelStep();
 
-                          // Skip first and last labels to prevent overflow
-                          if (index <= 0 || index >= dataLength - 1) {
+                          // Skip edges and non-step indices to prevent crowding
+                          if (index <= 0 || index >= dataLength - 1 || index % step != 0) {
                             return const SizedBox.shrink();
                           }
 
@@ -377,6 +384,9 @@ class _ChartCardState extends State<ChartCard> {
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
                                 currentData.primaryData[index].label,
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
                                 style: context.theme.typography.xs.copyWith(
                                   color: context.theme.colors.mutedForeground,
                                 ),
@@ -481,13 +491,16 @@ class _ChartCardState extends State<ChartCard> {
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
-                                reservedSize: 30,
-                                interval: (_currentDataSet.primaryData.length / 10).ceilToDouble(),
+                                reservedSize: 28,
+                                interval: _labelStep().toDouble(),
                                 getTitlesWidget: (value, meta) {
                                   final index = value.toInt();
                                   final currentData = _currentDataSet;
                                   final dataLength = currentData.primaryData.length;
-                                  if (index <= 0 || index >= dataLength - 1) {
+                                  final step = _labelStep();
+
+                                  // Skip edges and non-step indices to prevent crowding
+                                  if (index <= 0 || index >= dataLength - 1 || index % step != 0) {
                                     return const SizedBox.shrink();
                                   }
                                   if (index < dataLength) {
@@ -495,6 +508,9 @@ class _ChartCardState extends State<ChartCard> {
                                       padding: const EdgeInsets.only(top: 8),
                                       child: Text(
                                         currentData.primaryData[index].label,
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        overflow: TextOverflow.ellipsis,
                                         style: context.theme.typography.xs.copyWith(
                                           color: context.theme.colors.mutedForeground,
                                         ),
