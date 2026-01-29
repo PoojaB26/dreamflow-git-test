@@ -1,5 +1,7 @@
 # Dashboard Template
 
+[![Try in DreamFlow](https://img.shields.io/badge/Try%20in-Dreamflow-black)](https://github.com/PoojaB26/dreamflow-git-test.git)
+
 A business dashboard template built with Flutter Web and Forui design system (https://forui.dev/). Features responsive layouts, interactive charts, KPI metrics, and clean architecture for data-driven applications.
 
 ## 🚀 Quick Start
